@@ -23,14 +23,14 @@ class Agent:
     """
     self.num_actions = num_actions
     
-    self.actions = [i for i in range(num_actions)] # generates a list containing actions (integers) from 0 to num_actions - 1
+    self.actions = list(range(num_actions)) # generates a list containing actions (integers) from 0 to num_actions - 1
     
     self.q_estimates = np.zeros(num_actions) # current estimate, Q(a) - the sample average
     self.N = np.zeros(num_actions) # number of times a certain action is chosen
   
   def get_epsilon_greedy_action(self, epsilon = 1e-1):
     """
-    get_epsilon_greedy_action: a function that returns the action array with the highest current estimated value for all runs
+    get_epsilon_greedy_action: a function that returns the action with the highest current estimated value or a random action depending in epsilon
     """
 
     if is_greedy(epsilon):
@@ -49,12 +49,12 @@ class Agent:
   
   def select_argmax_action(self, run):
     """
-    select_argmax_action: selects the greedy action for all runs, with ties broken randomly
-    returns: a list containing the greedy action for all runs
+    select_argmax_action: selects the greedy action, with ties broken randomly
+    returns: the greedy action
     """
     top = float('-inf')
     ties = []
-    for action, q_estimate in enumerate(self.q_estimates):
+    for action, q_estimate in zip(self.actions, self.q_estimates):
       if top < q_estimate:
           top, ties = q_estimate, [action] 
       elif top == q_estimate:
