@@ -25,12 +25,24 @@ class Agent:
     
     self.actions = [i for i in range(num_actions)] # generates a list containing actions (integers) from 0 to num_actions - 1
     
-    self.q_estimate = np.zeros(num_actions) # current estimate, Q(a) - the sample average
+    self.q_estimates = np.zeros(num_actions) # current estimate, Q(a) - the sample average
     self.N = np.zeros(num_actions) # number of times a certain action is chosen
-    
-  def p_choose_greedy(self, epsilon):
+  
+  def get_epsilon_greedy_action(self, epsilon = 1e-1):
     """
-    p_choose_greedy: returns greedy drawn from probability, epsilon of greedy (boolean)
+    get_epsilon_greedy_action: a function that returns the action array with the highest current estimated value for all runs
+    """
+
+    if is_greedy(epsilon):
+      action = self.select_argmax_action()
+    else:
+      action = self.select_uniform_action()
+
+    return action        
+
+  def is_greedy(self, epsilon):
+    """
+    is_greedy: returns greedy drawn from probability, epsilon of greedy (boolean)
     """
     greedy = np.random.random() > epsilon
     return greedy
@@ -42,29 +54,22 @@ class Agent:
     """
     top = float('-inf')
     ties = []
-    for num_action in range(self.num_actions):
-      if top < self.q_estimate[num_action, run]:
-          top, ties = self.q_estimate[num_action, run], [run] 
-        elif top == self.q_estimate[num_action, run]:
-          ties.append(run)
-    
+    for action, q_estimate in enumerate(self.q_estimates):
+      if top < q_estimate:
+          top, ties = q_estimate, [action] 
+      elif top == q_estimate:
+        ties.append(action)
+
     greedy_action = np.random.choice(ties)
     return greedy_action
   
   def select_uniform_action(self):
     return np.random.choice(self.actions)
     
+  def update_N(self, action):
+    self.N[action] += 1
   
-  def get_epsilon_greedy_action(self, epsilon = 1e-1):
-    """
-    get_epsilon_greedy_action: a function that returns the action array with the highest current estimated value for all runs
-    """
-    action = np.zeros(runs)
-    
-    for run, greedy in enumerate(self.p_choose_greedy(epsilon)):
-      if greedy:
-        action[run] = self.select_argmax_action(run)
-      else:
-        action[run] = self.select_uniform_action()
-    
-    return action      
+  def update_Q(self, action, reward):
+    old_estimate = self.q_estimates[action]
+    self.q_estimates[action] = old_estimate + 1/N * (reward - old_estimate)
+  
