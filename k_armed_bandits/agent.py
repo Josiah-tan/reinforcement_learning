@@ -47,7 +47,7 @@ class Agent:
     greedy = np.random.random() > epsilon
     return greedy
   
-  def select_argmax_action(self, run):
+  def select_argmax_action(self):
     """
     select_argmax_action: selects the greedy action, with ties broken randomly
     returns: the greedy action
