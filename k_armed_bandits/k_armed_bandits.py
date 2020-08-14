@@ -22,3 +22,4 @@ if __name__ == "__main__":
   pass
 
 a = np.array([1,2,3])
+print(k)
