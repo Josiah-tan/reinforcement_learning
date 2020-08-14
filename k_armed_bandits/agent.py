@@ -71,5 +71,5 @@ class Agent:
   
   def update_Q(self, action, reward):
     old_estimate = self.q_estimates[action]
-    self.q_estimates[action] = old_estimate + 1/N * (reward - old_estimate)
+    self.q_estimates[action] = old_estimate + 1/self.N * (reward - old_estimate)
   
