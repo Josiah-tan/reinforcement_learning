@@ -8,5 +8,5 @@
 #================================================================
 
 #================================================================
-
+from .package_imports import *
 from .k_armed_bandits import * # this basically imports everything from k_armed_bandits.py so that you can use the stuff in k_armed_bandits.py as a module simply by using from k_armed_bandits import * 
