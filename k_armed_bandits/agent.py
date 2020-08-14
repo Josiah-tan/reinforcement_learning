@@ -33,7 +33,7 @@ class Agent:
     get_epsilon_greedy_action: a function that returns the action with the highest current estimated value or a random action depending in epsilon
     """
 
-    if is_greedy(epsilon):
+    if self.is_greedy(epsilon):
       action = self.select_argmax_action()
     else:
       action = self.select_uniform_action()
