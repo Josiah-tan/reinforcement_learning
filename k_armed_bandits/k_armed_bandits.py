@@ -8,3 +8,12 @@
 #================================================================
 
 #================================================================
+import numpy as np
+
+class KArmedBandits:
+  def __init__(self, num_actions = 10):
+    pass
+  def get_action_val_from_norm(self, action):
+    pass
+  def select_argmax_action(self):
+    pass
