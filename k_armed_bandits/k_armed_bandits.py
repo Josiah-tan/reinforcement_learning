@@ -8,7 +8,6 @@
 #================================================================
 
 #================================================================
-a = np.array([1,2,3])
 
 class KArmedBandits:
   def __init__(self, num_actions = 10):
@@ -17,3 +16,8 @@ class KArmedBandits:
     pass
   def select_argmax_action(self):
     pass
+
+if __name__ == "__main__":
+  pass
+
+a = np.array([1,2,3])
