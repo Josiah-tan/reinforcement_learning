@@ -43,18 +43,13 @@ if __name__ == "__main__":
   for run in range(1, runs + 1):
     agent = Agent()
     k_armed_bandits = KArmedBandits()
-    
-    rewards = []
-    
+        
     for step in range(steps):
       action = agent.get_epsilon_greedy_action()
       reward = k_armed_bandits.get_reward(action)
       agent.update_N(action)
       agent.update_Q(action, reward)
       
-      rewards.append(reward)
-    
-    for i, (reward, average_reward) in enumerate(zip(rewards, average_rewards)): # using the incremental average reward update hack
-      average_reward += 1/run * (reward - average_reward)
-      average_rewards[i] = average_reward
-    
+      # performing average reward update for a step
+      average_reward = average_rewards[step] 
+      average_rewards[step] += 1/run * (reward - average_reward)
