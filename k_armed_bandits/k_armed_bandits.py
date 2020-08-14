@@ -12,15 +12,60 @@ from .configs import *
 import numpy as np
 
 class KArmedBandits:
-  def __init__(self, num_actions = 10):
-    pass
-  def get_action_val_from_norm(self, action):
-    pass
-  def select_argmax_action(self):
-    pass
+  def __init__(self, num_actions = 10, runs = 200, tru_val_variance = 1, tru_val_mean = 0, sample_val_variance = 1):
+    """
+    __init__: initialisation of the KArmedBandits class
+      parameters -- num_actions: the number of actions that can be taken
+                 -- runs: the number of runs to average over
+                 -- tru_val_variance: variance of the true values q_star(a)
+                 -- tru_val_mean: mean of the true values q_star(a)
+                 -- sample_val_variance: variance of sampled rewards 
+    """
+    self.runs = runs
+    self.q_star = np.random.normal(tru_val_mean, tru_val_variance, (num_actions, runs)) # sampling from the normal distribution to obtain q_star(a)
+    self.sample_val_variance = sample_val_variance
+    self.actions = [i for i in range(num_actions)] # generates a list containing actions (integers) from 0 to num_actions - 1
+    self.q_estimate = np.zeros((num_actions, runs)) # current estimate, Q(a) - the sample average
+    self.N = np.zeros((num_actions, runs)) # number of times a certain action is chosen
+    
+  def p_choose_greedy(self, epsilon):
+    for _ in range(self.runs):
+      greedy = np.random.random() > epsilon
+      yield greedy
+  
+  def get_action(self, epsilon = 1e-1):
+    """
+    get_greedy_action: a function that returns the action array with the highest current estimated value for all runs
+    """
+    action = np.zeros(runs)
+    for run, greedy in enumerate(self.p_choose_greedy(epsilon)):
+      if greedy:
+        action[run] = self.select_argmax_action()
+      else:
+        action[run] = self.select_uniform_action()
+    
+    return action      
+      
+  def get_reward(self, action):
+    """
+    get_reward: gets the reward for a certain action from the normal distribution
+      parameters -- action, a integer between 0 and num_actions - 1
+      returns -- action_val, a number with variance, sample_val_variance and mean, tru_action_val for a given action 
+    """
+    tru_action_val = self.q_star[action] # selecting the tru_action_val from an index given by action
+    action_val = np.random.normal(tru_action_val, sample_val_variance)
+    return get_action_val
+  
+
 
 if __name__ == "__main__":
-  pass
+  k_armed_bandits = KArmedBandits()
+  steps = 100
+  for step in range(steps):
+    action = get_action()
+    reward = get_reward(action)
+    update_N(action)
+    update_Q(reward)
 
 a = np.array([1,2,3])
 print(k)
