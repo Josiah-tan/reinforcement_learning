@@ -22,25 +22,51 @@ class KArmedBandits:
                  -- sample_val_variance: variance of sampled rewards 
     """
     self.runs = runs
+    self.num_actions = num_actions
     self.q_star = np.random.normal(tru_val_mean, tru_val_variance, (num_actions, runs)) # sampling from the normal distribution to obtain q_star(a)
     self.sample_val_variance = sample_val_variance
+    
     self.actions = [i for i in range(num_actions)] # generates a list containing actions (integers) from 0 to num_actions - 1
+    
     self.q_estimate = np.zeros((num_actions, runs)) # current estimate, Q(a) - the sample average
     self.N = np.zeros((num_actions, runs)) # number of times a certain action is chosen
     
   def p_choose_greedy(self, epsilon):
+    """
+    p_choose_greedy: yields probability of greedy (boolean)
+    """
     for _ in range(self.runs):
       greedy = np.random.random() > epsilon
       yield greedy
   
-  def get_action(self, epsilon = 1e-1):
+  def select_argmax_action(self, run):
     """
-    get_greedy_action: a function that returns the action array with the highest current estimated value for all runs
+    select_argmax_action: selects the greedy action for all runs, with ties broken randomly
+    returns: a list containing the greedy action for all runs
+    """
+    top = float('-inf')
+    ties = []
+    for num_action in range(self.num_actions):
+      if top < self.q_estimate[num_action, run]:
+          top, ties = self.q_estimate[num_action, run], [run] 
+        elif top == self.q_estimate[num_action, run]:
+          ties.append(run)
+    
+    greedy_action = np.random.choice(ties)
+    return greedy_action
+  
+  def select_uniform_action(self):
+    return np.random.choice(self.actions)
+    
+  
+  def get_epsilon_greedy_action(self, epsilon = 1e-1):
+    """
+    get_epsilon_greedy_action: a function that returns the action array with the highest current estimated value for all runs
     """
     action = np.zeros(runs)
     for run, greedy in enumerate(self.p_choose_greedy(epsilon)):
       if greedy:
-        action[run] = self.select_argmax_action()
+        action[run] = self.select_argmax_action(run)
       else:
         action[run] = self.select_uniform_action()
     
@@ -62,10 +88,10 @@ if __name__ == "__main__":
   k_armed_bandits = KArmedBandits()
   steps = 100
   for step in range(steps):
-    action = get_action()
-    reward = get_reward(action)
-    update_N(action)
-    update_Q(reward)
+    action = k_armed_bandits.get_epsilon_greedy_action()
+    reward = k_armed_bandits.get_reward(action)
+    k_armed_bandits.update_N(action)
+    k_armed_bandits.update_Q(reward)
 
 a = np.array([1,2,3])
 print(k)
