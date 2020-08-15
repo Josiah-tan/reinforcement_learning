@@ -2,7 +2,7 @@
 #
 #   File name   : configs.py
 #   Author      : Josiah Tan
-#   Created date: 10/07/2020
+#   Created date: 14/08/2020
 #   Description : configuration file for k_armed_bandits
 #
 #================================================================
