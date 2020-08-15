@@ -27,14 +27,14 @@ class Agent:
     self.q_estimates = np.zeros(num_actions) # current estimate, Q(a) - the sample average
     self.N = np.zeros(num_actions) # number of times a certain action is chosen
   
-  def get_epsilon_greedy_action(self, epsilon = 1e-1):
+  def get_action(self, epsilon = 1e-1):
     """
-    get_epsilon_greedy_action: a function that returns the action with the highest current estimated value or a random action depending in epsilon
+    get_action: a function that returns the action with the highest current estimated value or a random action depending in epsilon
     parameters: epsilon -- a number between 0 and 1
     returns: action -- an integer between 0 and num_actions - 1
     """
 
-    if self.is_greedy(epsilon):
+    if self.choose_greedy(epsilon):
       action = self.select_argmax_action()
     else:
       action = self.select_uniform_action()
@@ -43,9 +43,9 @@ class Agent:
     
     return action        
 
-  def is_greedy(self, epsilon):
+  def choose_greedy(self, epsilon):
     """
-    is_greedy: returns greedy = True, with probability epsilon, otherwise greedy = False
+    choose_greedy: returns greedy = True, with probability epsilon, otherwise greedy = False
     """
     greedy = np.random.random() > epsilon
     return greedy
