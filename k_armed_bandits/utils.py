@@ -9,6 +9,8 @@
 
 #================================================================
 import numpy as np
+import matplotlib.pyplot as plt
+
 def sample_k_armed_bandits(cls, num_samples = 1000, plot = True):
   """
   sample_k_armed_bandits: samples the k_armed_bandit model with num_samples for each action and plots it using a basic boxplot
