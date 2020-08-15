@@ -11,6 +11,7 @@
 
 from joblib import Parallel, delayed
 from copy import deepcopy
+import numpy as np
 
 class Repeat:
   def __init__(self, num_times = 10, n_jobs = 10, run_parallel = True, return_avg = True, uses_random_seeds = True):
