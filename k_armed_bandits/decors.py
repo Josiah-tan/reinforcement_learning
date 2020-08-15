@@ -12,7 +12,7 @@
 from joblib import Parallel, delayed
 from copy import deepcopy
 
-class repeat:
+class Repeat:
   def __init__(self, num_times = 10, n_jobs = 10, run_parallel = True, return_avg = True):
     self.num_times = num_times
     self.n_jobs = n_jobs
@@ -34,7 +34,7 @@ class repeat:
 
   
 
-class override_method:
+class OverrideMethod:
   def __init__(self, cls, store_original = False):
     """
     __init__: basically overrides any method in a specified class
