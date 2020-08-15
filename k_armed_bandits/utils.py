@@ -21,3 +21,6 @@ def sample_k_armed_bandits(cls, num_samples = 1000, plot = True):
       sample_action_vals[action, num_sample] = cls.get_reward(action)
   if plot:
     plt.boxplot(sample_action_vals.T)
+    plt.title(f'The {cls.num_actions}-Armed Testbed')
+    plt.xlabel('Action')
+    plt.ylabel('Reward Distribution')
