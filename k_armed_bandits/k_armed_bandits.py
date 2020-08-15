@@ -8,11 +8,18 @@
 #================================================================
 
 #================================================================
-from .configs import *
+#from .configs import *
 import numpy as np
 
 class KArmedBandits:
   def __init__(self, num_actions = 10, tru_val_variance = 1, tru_val_mean = 0, sample_val_variance = 1):
+    """
+    __init__: initialisation of the KArmedBandits class
+      parameters -- num_actions: the number of actions that can be take
+                 -- tru_val_variance: variance of the true values q_star(a)
+                 -- tru_val_mean: mean of the true values q_star(a)
+                 -- sample_val_variance: variance of sampled rewards 
+    """
     self.num_actions = num_actions 
     self.q_star = np.random.normal(tru_val_mean, tru_val_variance, num_actions) # sampling from the normal distribution to obtain q_star(a)
     self.sample_val_variance = sample_val_variance    
@@ -36,20 +43,4 @@ class KArmedBandits:
 
 
 if __name__ == "__main__":
-  from agent import *
-  steps = 100
-  average_rewards = [0 for _ in range(steps)]
-  
-  for run in range(1, runs + 1):
-    agent = Agent()
-    k_armed_bandits = KArmedBandits()
-        
-    for step in range(steps):
-      action = agent.get_epsilon_greedy_action()
-      reward = k_armed_bandits.get_reward(action)
-      agent.update_N(action)
-      agent.update_Q(action, reward)
-      
-      # performing average reward update for a step
-      average_reward = average_rewards[step] 
-      average_rewards[step] += 1/run * (reward - average_reward)
+  pass
