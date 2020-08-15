@@ -11,7 +11,8 @@
 
 from joblib import Parallel, delayed
 from copy import deepcopy
-import numpy as np
+from numpy import mean
+#import numpy as np
 
 class Repeat:
   def __init__(self, num_times = 10, n_jobs = 10, run_parallel = True, return_avg = True, uses_random_seeds = True):
@@ -32,11 +33,11 @@ class Repeat:
       return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **kwargs) for _ in range(self.num_times))
       
     if self.return_avg:
-      from numpy import mean
-      return_list = np.array(return_list)
-      print(return_list.shape)
+      
+      #return_list = np.array(return_list)
+      #print(return_list.shape)
       return_list = mean(return_list, axis = 0)
-      print(return_list.shape)
+      #print(return_list.shape)
     return return_list
 
   
