@@ -25,6 +25,7 @@ class KArmedBandits:
     
     self.num_actions = num_actions 
     self.q_star = np.random.normal(tru_val_mean, tru_val_variance, num_actions) # sampling from the normal distribution to obtain q_star(a)
+    self.optimal_action = np.argmax(self.q_star)
     self.sample_val_variance = sample_val_variance    
 
     self.actions = [i for i in range(num_actions)] # generates a list containing actions (integers) from 0 to num_actions - 1
