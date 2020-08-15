@@ -2,7 +2,7 @@
 #
 #   File name   : __init__.py
 #   Author      : Josiah Tan
-#   Created date: 17/07/2020
+#   Created date: 14/08/2020
 #   Description : __init__ file for k_armed_bandits
 #
 #================================================================
