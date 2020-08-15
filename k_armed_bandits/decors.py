@@ -29,12 +29,12 @@ class repeat:
   
   def __call__(self, _func):
     if self.run_parallel:
-      
+      self._func = _func
       return self.parallel_decor
   
   @test_joblib_import
   def parallel_decor(self, *args, **kwargs):
-    return_list = Parallel(n_jobs=self.n_jobs)(delayed(_func)(*args, **kwargs) for _ in range(self.num_times))
+    return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **kwargs) for _ in range(self.num_times))
     
     if self.return_avg:
       from numpy import mean
