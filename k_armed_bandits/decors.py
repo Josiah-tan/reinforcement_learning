@@ -13,20 +13,23 @@ from joblib import Parallel, delayed
 from copy import deepcopy
 
 class Repeat:
-  def __init__(self, num_times = 10, n_jobs = 10, run_parallel = True, return_avg = True):
+  def __init__(self, num_times = 10, n_jobs = 10, run_parallel = True, return_avg = True, uses_random_seeds = True):
     self.num_times = num_times
     self.n_jobs = n_jobs
     self.run_parallel = run_parallel
     self.return_avg = return_avg
-  
+    self.uses_random_seeds = uses_random_seeds
   def __call__(self, _func):
     if self.run_parallel:
       self._func = _func
       return self.parallel_decor
   
   def parallel_decor(self, *args, **kwargs):
-    return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **kwargs) for _ in range(self.num_times))
-    
+    if self.uses_random_seeds: # if the function uses a random seed, then repeating the function would produce no real new results right?
+      return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **{**kwargs, **{"parallel_seed_no": seed_no}) for seed_no in range(self.num_times))
+    else:
+      return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **kwargs) for _ in range(self.num_times))
+      
     if self.return_avg:
       from numpy import mean
       return_list = mean(return_list, axis = 0)
