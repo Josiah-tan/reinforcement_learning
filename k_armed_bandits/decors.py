@@ -13,7 +13,7 @@ def test_joblib_import():
   try: 
     Parallel(n_jobs=1)(delayed(sqrt)(i**2) for i in range(1))
   except:
-    from joblib import Parallel, Delayed
+    from joblib import Parallel, delayed
 
 
 class repeat:
