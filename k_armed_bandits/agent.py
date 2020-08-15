@@ -8,18 +8,14 @@
 #================================================================
 
 #================================================================
-from .configs import *
+#from .configs import *
 import numpy as np
 
 class Agent:
   def __init__(self, num_actions = 10):
     """
     __init__: initialisation of the Agent class
-      parameters -- num_actions: the number of actions that can be taken
-                 -- runs: the number of runs to average over
-                 -- tru_val_variance: variance of the true values q_star(a)
-                 -- tru_val_mean: mean of the true values q_star(a)
-                 -- sample_val_variance: variance of sampled rewards 
+      parameters -- num_actions: the number of actions that can be take
     """
     self.num_actions = num_actions
     
@@ -31,18 +27,22 @@ class Agent:
   def get_epsilon_greedy_action(self, epsilon = 1e-1):
     """
     get_epsilon_greedy_action: a function that returns the action with the highest current estimated value or a random action depending in epsilon
+    parameters: epsilon -- a number between 0 and 1
+    returns: action -- an integer between 0 and num_actions - 1
     """
 
     if self.is_greedy(epsilon):
       action = self.select_argmax_action()
     else:
       action = self.select_uniform_action()
-
+    
+    self.prev_action = action # store for later use
+    
     return action        
 
   def is_greedy(self, epsilon):
     """
-    is_greedy: returns greedy drawn from probability, epsilon of greedy (boolean)
+    is_greedy: returns greedy = True, with probability epsilon, otherwise greedy = False
     """
     greedy = np.random.random() > epsilon
     return greedy
@@ -64,12 +64,21 @@ class Agent:
     return greedy_action
   
   def select_uniform_action(self):
+    """
+    select_uniform_action: selects an action uniformly at random
+    """
     return np.random.choice(self.actions)
     
-  def update_N(self, action):
-    self.N[action] += 1
+  def update_N(self):
+    """
+    update_N: updates self.N according to what the previous action was
+    """
+    self.N[self.prev_action] += 1
   
-  def update_Q(self, action, reward):
-    old_estimate = self.q_estimates[action]
-    self.q_estimates[action] = old_estimate + 1/self.N[action] * (reward - old_estimate)
+  def update_Q(self, reward):
+    """
+    update the current estimate, q_estimates of the previous action
+    """
+    old_estimate = self.q_estimates[self.prev_action]
+    self.q_estimates[self.prev_action] = old_estimate + 1/self.N[self.prev_action] * (reward - old_estimate)
   
