@@ -2,7 +2,7 @@
 #
 #   File name   : utils.py
 #   Author      : Josiah Tan
-#   Created date: 17/07/2020
+#   Created date: 15/08/2020
 #   Description : utils file for k_armed_bandits
 #
 #================================================================
