@@ -26,7 +26,7 @@ class Repeat:
   
   def parallel_decor(self, *args, **kwargs):
     if self.uses_random_seeds: # if the function uses a random seed, then repeating the function would produce no real new results right?
-      return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **{**kwargs, **{"parallel_seed_no": seed_no}) for seed_no in range(self.num_times))
+      return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **{**kwargs, **{"parallel_seed_no": seed_no}}) for seed_no in range(self.num_times))
     else:
       return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **kwargs) for _ in range(self.num_times))
       
