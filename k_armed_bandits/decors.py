@@ -10,15 +10,7 @@
 #================================================================
 
 from joblib import Parallel, delayed
-def test_joblib_import(func):
-  try: 
-    Parallel(n_jobs=1)(delayed(sqrt)(i**2) for i in range(1))
-  except:
-    from joblib import Parallel, delayed
 
-  def wrapper(*args, **kwargs):
-    return func(*args, **kwargs)
-  return wrapper
 
 class repeat:
   def __init__(self, num_times = 10, n_jobs = 10, run_parallel = True, return_avg = True):
@@ -32,7 +24,6 @@ class repeat:
       self._func = _func
       return self.parallel_decor
   
-  @test_joblib_import
   def parallel_decor(self, *args, **kwargs):
     return_list = Parallel(n_jobs=self.n_jobs)(delayed(self._func)(*args, **kwargs) for _ in range(self.num_times))
     
