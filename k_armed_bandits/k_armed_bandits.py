@@ -12,7 +12,7 @@
 import numpy as np
 
 class KArmedBandits:
-  def __init__(self, num_actions = 10, tru_val_variance = 1, tru_val_mean = 0, sample_val_variance = 1):
+  def __init__(self, num_actions = 10, tru_val_variance = 1, tru_val_mean = 0, sample_val_variance = 1, random_seed = 1):
     """
     __init__: initialisation of the KArmedBandits class
       parameters -- num_actions: the number of actions that can be taken
@@ -20,6 +20,9 @@ class KArmedBandits:
                  -- tru_val_mean: mean of the true values q_star(a)
                  -- sample_val_variance: variance of sampled rewards 
     """
+    # for reproducible results:
+    np.random.seed(random_seed)
+    
     self.num_actions = num_actions 
     self.q_star = np.random.normal(tru_val_mean, tru_val_variance, num_actions) # sampling from the normal distribution to obtain q_star(a)
     self.sample_val_variance = sample_val_variance    
