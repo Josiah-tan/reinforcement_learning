@@ -12,11 +12,14 @@
 import numpy as np
 
 class Agent:
-  def __init__(self, num_actions = 10):
+  def __init__(self, num_actions = 10, random_seed = 1):
     """
     __init__: initialisation of the Agent class
       parameters -- num_actions: the number of actions that can be take
     """
+    # use random seed to allow for reproducible results
+    np.random.seed(random_seed)
+    
     self.num_actions = num_actions
     
     self.actions = list(range(num_actions)) # generates a list containing actions (integers) from 0 to num_actions - 1
