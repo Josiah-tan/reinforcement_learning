@@ -32,8 +32,10 @@ class Repeat:
       
     if self.return_avg:
       from numpy import mean
+      return_list = np.array(return_list)
       print(return_list.shape)
       return_list = mean(return_list, axis = 0)
+      print(return_list.shape)
     return return_list
 
   
