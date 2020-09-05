@@ -10,4 +10,4 @@
 #================================================================
 
 
-import k_armed_bandits.decors as decors
+from k_armed_bandits.decors import Repeat, OverrideMethod
