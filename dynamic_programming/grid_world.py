@@ -24,7 +24,8 @@ class GridWorld:
     #self.s = [None, None] # current state
 
   def terminal_rewards(self):
-    self.rewards[self.terminal_states] = 0
+    pass
+    # interesting idea, didn't use it
 
   def get_rand_state(self):
     np.random.seed(self.rand_seed)
