@@ -1,9 +1,9 @@
 #================================================================
 #
-#   File name   : k_armed_bandits.py
+#   File name   : grid_world.py
 #   Author      : Josiah Tan
-#   Created date: 14/08/2020
-#   Description : contains k-armed Bandit class for K-armed Bandit Notes.ipynb
+#   Created date: 7/09/2020
+#   Description : contains grid_world class for Dynamic Programming
 #
 #================================================================
 
@@ -11,40 +11,79 @@
 #from .configs import *
 import numpy as np
 
-class KArmedBandits:
-  def __init__(self, num_actions = 10, tru_val_variance = 1, tru_val_mean = 0, sample_val_variance = 1, random_seed = 1):
+#gridworld.py
+class GridWorld:
+  def __init__(self, grid_dims, actions, terminal_states, rand_seed):
+    self.grid_dims = grid_dims
+    self.actions = actions
+    self.terminal_states = terminal_states
+    self.num_actions = len(actions)
+    self.rewards = -np.ones(self.grid_dims).astype(int)
+    self.rand_seed = rand_seed
+    #self.terminal_rewards()
+    #self.s = [None, None] # current state
+
+  def terminal_rewards(self):
+    self.rewards[self.terminal_states] = 0
+
+  def get_rand_state(self):
+    np.random.seed(self.rand_seed)
+    state = (np.random.choice(grid_dims[0]), np.random.choice(grid_dims[1]))
+    return state
+
+  def transition(self, state, action):
+    next_state = self.get_state(state, action)
+    reward = self.get_reward(next_state)  
+    return (next_state, reward)
+
+  def get_reward(self, state):
+    reward = self.rewards[tuple(state)]
+    return reward
+
+  def get_state(self, state, action):
+    next_state = list(state) # prevent pass by reference
+    if self.is_terminal(state):
+      return tuple(next_state)
+
+    action_str = actions[action]
+    if action_str == "left":
+      if next_state[1] > 0:
+        next_state[1] -= 1
+    elif action_str == "down":
+      if next_state[0] < self.grid_dims[0] - 1:
+        next_state[0] += 1
+    elif action_str == "up":
+      if next_state[0] > 0:
+        next_state[0] -= 1
+    elif action_str == "right":
+      if next_state[1] < self.grid_dims[1] - 1:
+        next_state[1] += 1
+    return tuple(next_state)
+
+  def is_terminal(self, state):
+    for terminal in zip(*self.terminal_states):
+      if terminal == state:
+        return True
+    return False
+
+  def disp(self, state, flush = False):
     """
-    __init__: initialisation of the KArmedBandits class
-      parameters -- num_actions: the number of actions that can be taken
-                 -- tru_val_variance: variance of the true values q_star(a)
-                 -- tru_val_mean: mean of the true values q_star(a)
-                 -- sample_val_variance: variance of sampled rewards 
+    disp for printing the environment via env.disp(state)
     """
-    # for reproducible results:
-    np.random.seed(random_seed)
-    
-    self.num_actions = num_actions 
-    self.q_star = np.random.normal(tru_val_mean, tru_val_variance, num_actions) # sampling from the normal distribution to obtain q_star(a)
-    self.optimal_action = np.argmax(self.q_star)
-    self.sample_val_variance = sample_val_variance    
-
-    self.actions = [i for i in range(num_actions)] # generates a list containing actions (integers) from 0 to num_actions - 1
-
-  def get_reward(self, action):
-      """
-      get_reward: gets the reward for a certain action from the normal distribution
-        parameters -- action, a integer between 0 and num_actions - 1
-        returns -- action_val, a number with variance-sample_val_variance and mean-tru_action_val for a given action 
-      """
-      tru_action_val = self.q_star[action] # selecting the tru_action_val from an index given by action
-      action_val = np.random.normal(tru_action_val, self.sample_val_variance)
-      return action_val    
-
-
-      
-  
-  
+    states = np.array([['| |']*grid_dims[1]]*grid_dims[0])
+    states[self.terminal_states] = '|T|'
+    states[state] = '|A|'
+    print(str(states), flush = flush)
 
 
 if __name__ == "__main__":
-  pass
+  #testing the environment
+  env = GridWorld(grid_dims, actions, terminal_states, rand_seed)
+  state = env.get_rand_state()
+  np.random.seed(rand_seed)
+  for i in range(25):
+    sleep(0.3)
+    clear_output(wait=True)
+    state, reward= env.transition(state, action = np.random.choice(4))
+    env.disp(state, flush = True)
+    print(f"state = {state}, reward = {reward}")
