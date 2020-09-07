@@ -46,7 +46,7 @@ class GridWorld:
     if self.is_terminal(state):
       return tuple(next_state)
 
-    action_str = actions[action]
+    action_str = self.actions[action]
     if action_str == "left":
       if next_state[1] > 0:
         next_state[1] -= 1
