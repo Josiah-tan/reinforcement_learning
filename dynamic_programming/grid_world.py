@@ -38,7 +38,7 @@ class GridWorld:
     return (next_state, reward)
 
   def get_reward(self, state):
-    reward = self.rewards[tuple(state)]
+    reward = self.rewards[state]
     return reward
 
   def get_state(self, state, action):
