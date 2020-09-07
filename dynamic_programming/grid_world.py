@@ -71,7 +71,7 @@ class GridWorld:
     """
     disp for printing the environment via env.disp(state)
     """
-    states = np.array([['| |']*grid_dims[1]]*grid_dims[0])
+    states = np.array([['| |']*self.grid_dims[1]]*self.grid_dims[0])
     states[self.terminal_states] = '|T|'
     states[state] = '|A|'
     print(str(states), flush = flush)
