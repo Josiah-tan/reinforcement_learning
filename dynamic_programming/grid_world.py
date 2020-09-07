@@ -29,7 +29,7 @@ class GridWorld:
 
   def get_rand_state(self):
     np.random.seed(self.rand_seed)
-    state = (np.random.choice(grid_dims[0]), np.random.choice(grid_dims[1]))
+    state = (np.random.choice(self.grid_dims[0]), np.random.choice(self.grid_dims[1]))
     return state
 
   def transition(self, state, action):
