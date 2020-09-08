@@ -290,4 +290,4 @@ if __name__ == "__main__":
   #TestAgent.test_policy_iteration()
   #TestAgent.test_value_iteration()
   #TestAgent.test_value_iteration_v2()
-  TestAgent.test_real_time_dynamic_programming(
+  TestAgent.test_real_time_dynamic_programming()
