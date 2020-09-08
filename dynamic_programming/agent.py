@@ -2,8 +2,8 @@
 #
 #   File name   : agent.py
 #   Author      : Josiah Tan
-#   Created date: 14/08/2020
-#   Description : contains Agent class for K-armed Bandit Notes.ipynb
+#   Created date: 8/09/2020
+#   Description : contains Agent and RTAgent (real time agent) class for dynamic programming 
 #
 #================================================================
 
@@ -11,77 +11,283 @@
 #from .configs import *
 import numpy as np
 
+#agent.py
 class Agent:
-  def __init__(self, num_actions = 10, random_seed = 1):
+  def __init__(self, grid_dims, actions, rand_seed, verbose = 0):
     """
-    __init__: initialisation of the Agent class
-      parameters -- num_actions: the number of actions that can be take
-    """
-    # use random seed to allow for reproducible results
-    np.random.seed(random_seed)
-    
-    self.num_actions = num_actions
-    
-    self.actions = list(range(num_actions)) # generates a list containing actions (integers) from 0 to num_actions - 1
-    
-    self.q_estimates = np.zeros(num_actions) # current estimate, Q(a) - the sample average
-    self.N = np.zeros(num_actions) # number of times a certain action is chosen
-  
-  def get_action(self, epsilon = 1e-1):
-    """
-    get_action: a function that returns the action with the highest current estimated value or a random action depending in epsilon
-    parameters: epsilon -- a number between 0 and 1
-    returns: action -- an integer between 0 and num_actions - 1
+    initialises the agent class
+    paramters:
+      grid_dims -- a tuple (y, x)
+      actions -- a dictionary mapping action integers to actions - "left", "right", "up", "down"
+      rand_seed -- a "pseudo random" seed for reproducible results 
+      verbose -- 1 or 0, 0 means don't print anything, 1 means print everything - useful for debugging
     """
 
-    if self.choose_greedy(epsilon):
-      action = self.select_argmax_action()
+    self.grid_dims = grid_dims
+    self.actions = actions
+    self.num_actions = len(actions)
+    self.rand_seed = rand_seed
+    self.verbose = verbose
+
+    self.pi = np.ones((grid_dims[0], grid_dims[1], self.num_actions)) / self.num_actions
+    self.V = np.zeros(grid_dims)
+  
+  def disp_v_pi(self, clear = True, sleep_time = 0.5, user_input = False, disp_v = True, disp_pi = True):
+    """
+    Prints out the matrices v and pi
+    paramters:
+      clear -- default is True, clears the output before printing
+      sleep_time -- defualt is 0.5 seconds, the wait time after printing
+      user_input -- default is False, if True wait for the user to continue the program
+    """
+    if clear:
+      clear_output(wait=True)
+
+    if disp_v: 
+      print("v:")
+      print(self.V)   
+
+    if disp_pi:
+      print("pi:")
+      self.disp_pi() 
+
+    if user_input:
+      input("Press enter to continue: \n")
     else:
-      action = self.select_uniform_action()
-    
-    self.prev_action = action # store for later use
-    
-    return action        
+      sleep(sleep_time)
 
-  def choose_greedy(self, epsilon):
-    """
-    choose_greedy: returns greedy = True, with probability epsilon, otherwise greedy = False
-    """
-    greedy = np.random.random() > epsilon
-    return greedy
-  
-  def select_argmax_action(self):
-    """
-    select_argmax_action: selects the greedy action, with ties broken randomly
-    returns: the greedy action
-    """
-    top = float('-inf')
-    ties = []
-    for action, q_estimate in zip(self.actions, self.q_estimates):
-      if top < q_estimate:
-          top, ties = q_estimate, [action] 
-      elif top == q_estimate:
-        ties.append(action)
+  def disp_pi(self, flush = False):
+    greedy_actions = (self.pi == np.max(self.pi, axis = -1, keepdims=True)).astype(int)
+    states = np.array([["ldur"] * self.grid_dims[1]] * self.grid_dims[0])
 
-    greedy_action = np.random.choice(ties)
-    return greedy_action
-  
-  def select_uniform_action(self):
-    """
-    select_uniform_action: selects an action uniformly at random
-    """
-    return np.random.choice(self.actions)
+    for i in range(grid_dims[0]):
+      for j in range(grid_dims[1]):
+        optimal_actions = np.argwhere(greedy_actions[i][j]).ravel().tolist()
+        state = ""
+        for key, val in self.actions.items():
+          if key in optimal_actions:
+            state += val[0]
+          else:
+            state += " "
+        states[i][j] = state
+    print(str(states), flush = flush)
+
+  def state_generator(self):
+    for row in range(grid_dims[0]):
+      for col in range(grid_dims[1]):
+        state = (row, col)
+        yield state
+
+  def policy_evaluation(self, env, gamma = 0.9, theta = 0.1):
+    while True:
+        delta = 0
+        for state in self.state_generator():
+          v = self.V[state] # suprisingly, no need to use np.copy()
+
+          self.bellman_update(env, state, gamma)
+          
+          delta = max(delta, np.abs(v - self.V[state]))
+        if delta < theta:
+          break
+
+  def get_action_vals(self, env, state, gamma):
+    actions = self.pi[state[0]][state[1]]
+    action_vals = np.zeros_like(actions)
+    for action in range(self.num_actions): # perform a one-step lookout
+      next_state, reward = env.transition(state, action)
+      action_vals[action] = reward + gamma * self.V[next_state] # calculate a bootstrapped return
+    return action_vals
+
+  def bellman_update(self, env, state, gamma):
+    if env.is_terminal(state): # check if the state is terminal
+        return
+    action_vals = self.get_action_vals(env, state, gamma)
+    actions = self.pi[state[0]][state[1]]
+    self.V[state] = np.dot(action_vals,actions)
     
-  def update_N(self):
-    """
-    update_N: updates self.N according to what the previous action was
-    """
-    self.N[self.prev_action] += 1
+  def policy_iteration(self, env, gamma = 0.9, theta = 0.1):
+    policy_stable = False
+    while not policy_stable:
+
+      self.disp_v_pi(user_input = True)
+
+      self.policy_evaluation(env, gamma, theta)
+      policy_stable = self.policy_improvement(env, gamma, theta)
+      
+  def policy_improvement(self, env, gamma = 0.9, theta = 0.1):
+    policy_stable = True
+    for state in self.state_generator():
+      old_action = np.copy(self.pi[state[0]][state[1]])
+      self.q_greedify_policy(env, state, gamma)
+      if not np.array_equal(old_action, self.pi[state[0]][state[1]]):
+        policy_stable = False
+    return policy_stable
   
-  def update_Q(self, reward):
-    """
-    update the current estimate, q_estimates of the previous action
-    """
-    old_estimate = self.q_estimates[self.prev_action]
-    self.q_estimates[self.prev_action] = old_estimate + 1/self.N[self.prev_action] * (reward - old_estimate)
+  def q_greedify_policy(self, env, state, gamma):
+    if env.is_terminal(state): # check if the state is terminal
+        return
+
+    action_vals = self.get_action_vals(env, state, gamma)
+    greedy_actions = action_vals == np.max(action_vals)
+    self.pi[state[0]][state[1]] = greedy_actions / np.sum(greedy_actions)
+
+  def value_iteration(self, env, gamma = 0.9, theta = 0.1):
+    while True:
+      delta = 0
   
+      self.disp_v_pi(user_input = True, disp_pi = False)
+
+      for state in self.state_generator():
+        v = self.V[state]
+        self.bellman_optimality_update(env, state, gamma)
+        delta = max(delta, np.abs(v - self.V[state]))
+      if delta < theta:
+        break
+    for state in self.state_generator():
+      self.q_greedify_policy(env, state, gamma)
+
+    self.disp_v_pi()
+    
+  def value_iteration_v2(self, env, gamma = 0.9, theta = 0.1):
+    while True:
+      delta = 0
+      
+      self.disp_v_pi(user_input = True)
+
+      for state in self.state_generator():
+        v = self.V[state]
+        self.q_greedify_policy(env, state, gamma)
+        self.bellman_update(env, state, gamma)
+        delta = max(delta, np.abs(v - self.V[state]))
+      if delta < theta:
+        break
+    for state in self.state_generator():
+      self.q_greedify_policy(env, state, gamma)
+
+    self.disp_v_pi()
+
+  def bellman_optimality_update(self, env, state, gamma):
+    if env.is_terminal(state): # check if the state is terminal
+        return
+
+    action_vals = self.get_action_vals(env, state, gamma)
+
+    self.V[state] = np.max(action_vals)
+ 
+class RTAgent(Agent):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+  def real_time_dynamic_programming(self, env, gamma, horizon):
+    np.random.seed(self.rand_seed)
+    state = env.get_rand_state()
+    for t in range(horizon):
+      
+      self.disp_v_pi(sleep_time = 0.1)
+
+      self.q_greedify_policy(env, state, gamma)
+      self.bellman_update(env, state, gamma)
+
+      #self.bellman_optimality_update(env, state, gamma)
+      
+      
+      actions = self.pi[state[0]][state[1]]
+      action = np.random.choice(range(self.num_actions), p = actions)
+      state = env.get_state(state, action)
+
+      if env.is_terminal(state):
+        state = env.get_rand_state()
+
+
+if __name__ == "__main__":
+  class TestAgent:
+
+    @staticmethod
+    def test_v_pi():
+      agent = Agent(grid_dims, actions, rand_seed)
+      print(agent.V)
+      print(agent.pi)
+
+    @staticmethod
+    def test_state_generator():
+      agent = Agent(grid_dims, actions, rand_seed)
+      for row, col in agent.state_generator():
+        print(row, col, end= ', ')
+
+    @staticmethod
+    def test_policy_evaluation():
+      agent = Agent(grid_dims, actions, rand_seed)
+      env = GridWorld(grid_dims, actions, terminal_states, rand_seed)
+      agent.policy_evaluation(env, gamma = 1, theta = 0.1)
+      print(agent.V)
+
+    @staticmethod
+    def test_policy_iteration():
+      agent = Agent(grid_dims, actions, rand_seed)
+      env = GridWorld(grid_dims, actions, terminal_states, rand_seed)
+      env.rewards[3,1:] = -10 # 5x5
+      env.rewards[1,0:4] = -10 # 5x5
+
+      print("rewards")
+      print(env.rewards)
+      print("environment")
+      env.disp(env.get_rand_state())
+      input("Press Enter to continue \n")
+
+      agent.policy_iteration(env, gamma = 1, theta = 0.1)
+
+      agent.policy_evaluation(env, gamma = 1, theta = 0.1)
+
+      print("Evaluation of Optimal Policy")
+      print(agent.V)
+
+    @staticmethod
+    def test_value_iteration():
+      agent = Agent(grid_dims, actions, rand_seed)
+      env = GridWorld(grid_dims, actions, terminal_states, rand_seed)
+      env.rewards[3,1:] = -10 # 5x5
+      env.rewards[1,0:4] = -10 # 5x5
+
+      print("rewards")
+      print(env.rewards)
+      print("environment")
+      env.disp(env.get_rand_state())
+      input("Press Enter to continue \n")
+
+      agent.value_iteration(env, gamma = 1, theta = 0.1)
+      
+    @staticmethod
+    def test_value_iteration_v2():
+      agent = Agent(grid_dims, actions, rand_seed)
+      env = GridWorld(grid_dims, actions, terminal_states, rand_seed)
+      env.rewards[3,1:] = -10 # 5x5
+      env.rewards[1,0:4] = -10 # 5x5
+
+      print("rewards")
+      print(env.rewards)
+      print("environment")
+      env.disp(env.get_rand_state())
+      input("Press Enter to continue \n")
+      
+      agent.value_iteration_v2(env, gamma = 1, theta = 0.1)
+
+    @staticmethod
+    def test_real_time_dynamic_programming():
+      agent = RTAgent(grid_dims, actions, rand_seed)
+      env = GridWorld(grid_dims, actions, terminal_states, rand_seed)
+      env.rewards[3,1:] = -10 # 5x5
+      env.rewards[1,0:4] = -10 # 5x5
+
+      print("rewards")
+      print(env.rewards)
+      print("environment")
+      env.disp(env.get_rand_state())
+      input("Press Enter to continue \n")
+
+      agent.real_time_dynamic_programming(env, gamma = 1, horizon = 300)
+  
+  #TestAgent.test_policy_evaluation()
+  #TestAgent.test_state_generator()         
+  #TestAgent.test_policy_iteration()
+  #TestAgent.test_value_iteration()
+  #TestAgent.test_value_iteration_v2()
+  TestAgent.test_real_time_dynamic_programming(
