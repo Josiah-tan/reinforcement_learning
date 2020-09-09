@@ -60,8 +60,8 @@ class Agent:
     greedy_actions = (self.pi == np.max(self.pi, axis = -1, keepdims=True)).astype(int)
     states = np.array([["ldur"] * self.grid_dims[1]] * self.grid_dims[0])
 
-    for i in range(grid_dims[0]):
-      for j in range(grid_dims[1]):
+    for i in range(self.grid_dims[0]):
+      for j in range(self.grid_dims[1]):
         optimal_actions = np.argwhere(greedy_actions[i][j]).ravel().tolist()
         state = ""
         for key, val in self.actions.items():
@@ -73,8 +73,8 @@ class Agent:
     print(str(states), flush = flush)
 
   def state_generator(self):
-    for row in range(grid_dims[0]):
-      for col in range(grid_dims[1]):
+    for row in range(self.grid_dims[0]):
+      for col in range(self.grid_dims[1]):
         state = (row, col)
         yield state
 
