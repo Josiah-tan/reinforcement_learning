@@ -10,7 +10,7 @@
 #================================================================
 #from .configs import *
 import numpy as np
-from Ipython.display import clear_output
+from IPython.display import clear_output
 
 #agent.py
 class Agent:
