@@ -11,6 +11,7 @@
 #from .configs import *
 import numpy as np
 from IPython.display import clear_output
+from time import sleep
 
 #agent.py
 class Agent:
