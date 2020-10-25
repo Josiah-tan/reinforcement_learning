@@ -78,6 +78,12 @@ class GridWorld:
 
 
 if __name__ == "__main__":
+  # defining some constants
+  grid_dims = (5,5) # for the dimensions of the grid world
+  actions = {0 : "left", 1 : "down", 2 : "up", 3 : "right"} # a dictionary of actions
+  terminal_states = ([0,4],[0,4]) # read coordinates along axis = 0, only positive values permitted
+  rand_seed = 4
+  
   #testing the environment
   env = GridWorld(grid_dims, actions, terminal_states, rand_seed)
   state = env.get_rand_state()
